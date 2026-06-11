@@ -39,7 +39,13 @@ dicfilter
 
 > GUI の日本語表示にはシステムにインストールされた CJK フォント（Windows: 游ゴシック/メイリオ/MS ゴシック、macOS: ヒラギノ、Linux: Noto Sans CJK 等）を使用します。
 
+## ダウンロード
+
+各 OS（Linux / Windows / macOS）向けのビルド済みバイナリは、GitHub の [Releases](../../releases) から Zip 形式でダウンロードできます。Zip を展開して実行してください。
+
 ## ビルド
+
+ソースからビルドする場合:
 
 ```
 cargo build --release
@@ -51,7 +57,3 @@ cargo build --release
 sudo apt-get install -y libgtk-3-dev libxcb-render0-dev \
   libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev libssl-dev
 ```
-
-## リリース
-
-GitHub の Release を作成すると、GitHub Actions が各 OS（Linux / Windows / macOS）向けのバイナリをビルドし、Zip にまとめて Release アセットへ追加します。
