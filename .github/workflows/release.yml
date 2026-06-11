@@ -55,13 +55,12 @@ jobs:
       - name: Package (Unix)
         if: runner.os != 'Windows'
         run: |
-          cd target/${{ matrix.target }}/release
-          zip ../../../${{ matrix.asset }} ${{ matrix.bin }}
+          zip -j ${{ matrix.asset }} target/${{ matrix.target }}/release/${{ matrix.bin }} filter.txt
 
       - name: Package (Windows)
         if: runner.os == 'Windows'
         run: |
-          Compress-Archive -Path target/${{ matrix.target }}/release/${{ matrix.bin }} -DestinationPath ${{ matrix.asset }}
+          Compress-Archive -Path target/${{ matrix.target }}/release/${{ matrix.bin }}, filter.txt -DestinationPath ${{ matrix.asset }}
 
       - name: Upload release asset
         uses: softprops/action-gh-release@v2
