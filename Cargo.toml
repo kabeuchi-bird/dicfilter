@@ -1,0 +1,16 @@
+[package]
+name = "dicfilter"
+version = "0.1.0"
+edition = "2021"
+description = "Extract lines containing any of the filter strings from a text file"
+license = "Unlicense"
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+eframe = "0.27"
+egui = "0.27"
+rfd = "0.14"
+
+[profile.release]
+strip = true
+lto = true
