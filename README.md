@@ -13,7 +13,7 @@
 
 ## CLI
 
-```
+```bash
 dicfilter -i 入力.txt -o 出力.txt -f filter.txt
 ```
 
@@ -27,7 +27,7 @@ dicfilter -i 入力.txt -o 出力.txt -f filter.txt
 
 引数なしで起動すると GUI が立ち上がります。
 
-```
+```bash
 dicfilter
 ```
 
@@ -47,13 +47,13 @@ dicfilter
 
 ソースからビルドする場合:
 
-```
+```bash
 cargo build --release
 ```
 
 ### Linux で GUI をビルドする場合の依存パッケージ
 
-```
+```bash
 sudo apt-get install -y libgtk-3-dev libxcb-render0-dev \
   libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev libssl-dev
 ```

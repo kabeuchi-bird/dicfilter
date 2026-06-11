@@ -98,14 +98,14 @@ impl eframe::App for DicApp {
 
 impl DicApp {
     fn execute(&mut self) {
-        let Some(input) = self.input.clone() else {
+        let Some(input) = self.input.as_ref() else {
             self.status = "入力ファイルを選択してください。".to_string();
             return;
         };
         let output = PathBuf::from(self.output.trim());
         let filter_path = PathBuf::from(self.filter.trim());
 
-        match filter::run(&input, &output, &filter_path) {
+        match filter::run(input, &output, &filter_path) {
             Ok(_count) => {
                 self.status = format!("{}に出力しました", output.display());
             }

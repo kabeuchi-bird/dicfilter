@@ -72,8 +72,8 @@ pub fn load_filters(path: &Path) -> Result<Vec<String>, DicError> {
 
     let filters: Vec<String> = split_lines(&content)
         .into_iter()
-        .map(|line| line.to_string())
         .filter(|line| !line.is_empty())
+        .map(|line| line.to_string())
         .collect();
 
     if filters.is_empty() {
@@ -97,7 +97,7 @@ pub fn filter_lines(input_path: &Path, filters: &[String]) -> Result<Vec<String>
 
     let matched: Vec<String> = split_lines(&content)
         .into_iter()
-        .filter(|line| filters.iter().any(|filter| line.contains(filter.as_str())))
+        .filter(|line| filters.iter().any(|filter| line.contains(filter)))
         .map(|line| line.to_string())
         .collect();
 
@@ -108,7 +108,8 @@ pub fn filter_lines(input_path: &Path, filters: &[String]) -> Result<Vec<String>
 ///
 /// 各行末に CRLF を付与する（末尾行にも付与する）。
 pub fn write_output(path: &Path, lines: &[String]) -> Result<(), DicError> {
-    let mut out = String::new();
+    let capacity: usize = lines.iter().map(|line| line.len() + 2).sum();
+    let mut out = String::with_capacity(capacity);
     for line in lines {
         out.push_str(line);
         out.push_str("\r\n");
