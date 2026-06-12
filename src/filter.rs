@@ -120,6 +120,38 @@ pub fn write_output(path: &Path, lines: &[String]) -> Result<(), DicError> {
     })
 }
 
+/// 出力ファイルが既に存在する場合に、衝突しないパスを返す。
+///
+/// 既存なら `名前(1).拡張子`, `名前(2).拡張子` … と連番を付けて、存在しない
+/// 最初のパスを返す。存在しなければ元のパスをそのまま返す。
+pub fn resolve_output_path(path: &Path) -> PathBuf {
+    if !path.exists() {
+        return path.to_path_buf();
+    }
+    let parent = path.parent();
+    let stem = path
+        .file_stem()
+        .map(|s| s.to_string_lossy().into_owned())
+        .unwrap_or_default();
+    let ext = path.extension().map(|s| s.to_string_lossy().into_owned());
+
+    let mut i: u64 = 1;
+    loop {
+        let name = match &ext {
+            Some(e) => format!("{stem}({i}).{e}"),
+            None => format!("{stem}({i})"),
+        };
+        let candidate = match parent {
+            Some(p) if !p.as_os_str().is_empty() => p.join(&name),
+            _ => PathBuf::from(&name),
+        };
+        if !candidate.exists() {
+            return candidate;
+        }
+        i += 1;
+    }
+}
+
 /// 一連の処理（フィルタ読込 → 抽出 → 出力）を実行し、抽出した行数を返す。
 pub fn run(input: &Path, output: &Path, filter: &Path) -> Result<usize, DicError> {
     let filters = load_filters(filter)?;
@@ -182,6 +214,37 @@ mod tests {
         let written = fs::read(&output).unwrap();
         assert_eq!(written, b"world\r\nabc\r\n");
         for p in [input, filter, output] {
+            fs::remove_file(&p).ok();
+        }
+    }
+
+    #[test]
+    fn resolves_output_collision_with_numbered_suffix() {
+        let dir = std::env::temp_dir();
+        let pid = std::process::id();
+        let base = dir.join(format!("dicfilter_col_{pid}.txt"));
+        fs::remove_file(&base).ok();
+
+        // 存在しなければ元のパスをそのまま返す。
+        assert_eq!(resolve_output_path(&base), base);
+
+        // base が存在すると (1) になる。
+        write_file(&base, b"x");
+        let r1 = resolve_output_path(&base);
+        assert_eq!(
+            r1.file_name().unwrap().to_string_lossy(),
+            format!("dicfilter_col_{pid}(1).txt")
+        );
+
+        // base と (1) が存在すると (2) になる。
+        write_file(&r1, b"x");
+        let r2 = resolve_output_path(&base);
+        assert_eq!(
+            r2.file_name().unwrap().to_string_lossy(),
+            format!("dicfilter_col_{pid}(2).txt")
+        );
+
+        for p in [base, r1, r2] {
             fs::remove_file(&p).ok();
         }
     }

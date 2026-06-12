@@ -31,28 +31,23 @@ pub struct CliArgs {
 
 /// CLI を実行する。
 pub fn run(args: CliArgs) -> ExitCode {
-    match filter::run(&args.input, &args.output, &args.filter) {
+    // 既存ファイルを上書きしないよう、衝突しない出力パスを決定する。
+    let output = filter::resolve_output_path(&args.output);
+    match filter::run(&args.input, &output, &args.filter) {
         Ok(count) => {
-            println!(
-                "{} 行を抽出し、{} に出力しました。",
-                count,
-                args.output.display()
-            );
+            println!("{} 行を抽出し、{} に出力しました。", count, output.display());
             ExitCode::SUCCESS
         }
         Err(err) => {
             // エラーログを標準エラー出力へ
             eprintln!("[エラー] {}", err);
             // 日本語のエラー詳細を出力ファイルへ記載（ベストエフォート）
-            if filter::write_error_report(&args.output, &err) {
-                eprintln!(
-                    "エラー詳細を {} に書き込みました。",
-                    args.output.display()
-                );
+            if filter::write_error_report(&output, &err) {
+                eprintln!("エラー詳細を {} に書き込みました。", output.display());
             } else {
                 eprintln!(
                     "出力ファイル {} へのエラー詳細の書き込みにも失敗しました。",
-                    args.output.display()
+                    output.display()
                 );
             }
             ExitCode::FAILURE

@@ -102,7 +102,8 @@ impl DicApp {
             self.status = "入力ファイルを選択してください。".to_string();
             return;
         };
-        let output = PathBuf::from(self.output.trim());
+        // 既存ファイルを上書きしないよう、衝突しない出力パスを決定する。
+        let output = filter::resolve_output_path(&PathBuf::from(self.output.trim()));
         let filter_path = PathBuf::from(self.filter.trim());
 
         match filter::run(input, &output, &filter_path) {
