@@ -125,7 +125,11 @@ pub fn write_output(path: &Path, lines: &[String]) -> Result<(), DicError> {
 /// 既存なら `名前(1).拡張子`, `名前(2).拡張子` … と連番を付けて、存在しない
 /// 最初のパスを返す。存在しなければ元のパスをそのまま返す。
 pub fn resolve_output_path(path: &Path) -> PathBuf {
-    if !path.exists() {
+    // 衝突回避の対象は「既存の通常ファイル」のみとする。
+    // 存在しない場合はそのまま返す（書き込み時に新規作成される）。
+    // ディレクトリ等の通常ファイル以外が指定された場合も退避せずそのまま返し、
+    // 後続の書き込みで明示的にエラーとする。
+    if !path.is_file() {
         return path.to_path_buf();
     }
     let parent = path.parent();
@@ -247,6 +251,15 @@ mod tests {
         for p in [base, r1, r2] {
             fs::remove_file(&p).ok();
         }
+    }
+
+    #[test]
+    fn directory_output_is_not_dodged() {
+        let dir = std::env::temp_dir().join(format!("dicfilter_dir_{}", std::process::id()));
+        fs::create_dir_all(&dir).unwrap();
+        // 出力先がディレクトリの場合は退避せず、そのままのパスを返す。
+        assert_eq!(resolve_output_path(&dir), dir);
+        fs::remove_dir_all(&dir).ok();
     }
 
     #[test]
