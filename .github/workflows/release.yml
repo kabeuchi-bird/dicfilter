@@ -3,6 +3,11 @@ name: Release
 on:
   release:
     types: [created]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "対象のリリースタグ（例: v1.0.0）。このタグのリリースにビルド成果物を添付します。"
+        required: true
 
 permissions:
   contents: write
@@ -65,4 +70,5 @@ jobs:
       - name: Upload release asset
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.event.inputs.tag || github.ref_name }}
           files: ${{ matrix.asset }}
